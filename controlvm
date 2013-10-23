@@ -1,0 +1,326 @@
+#!/bin/bash
+
+blue="\E[34m\E[1m";
+red="\E[31m\E[1m";
+yellow="\E[33m\E[1m";
+green="\E[37m\E[32m\E[1m";
+normal="\E[m";
+source funciones.sh
+
+
+case $1 in
+       
+
+	 stop)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status running 
+echo -e "$red----------------------------------------------------------------------------------"		
+		echo -e "$blue¿Que maquina virtual deseas apagar?"
+		echo -e $normal
+		read VM
+		if [ "$VM" != "" ]
+                then
+                VBoxManage controlvm $VM poweroff
+		fi;;
+
+ 
+       
+
+	 start)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status powered off
+echo -e "$red----------------------------------------------------------------------------------"
+		echo -e "$blue¿Que maquina virtual deseas encender?"
+		echo -e $normal
+		read VM
+	 	if [ "$VM" != "" ]
+		then
+			VBoxHeadless --startvm $VM &
+		fi;;
+	
+	pause)
+
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status running
+echo -e "$red----------------------------------------------------------------------------------"
+		echo -e "$blue¿Que maquina deseas poner en pausa?"
+		echo -e $normal
+		read VM
+                if [ "$VM" != "" ]
+                then
+			VBoxManage controlvm $VM pause
+		fi;;
+
+
+	resume)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status paused
+echo -e "$red----------------------------------------------------------------------------------"
+		echo -e "$blue¿Que maquina deseas sacar de pausa?"
+		echo -e $normal
+		read VM
+                if [ "$VM" != "" ]
+                then
+			VBoxManage controlvm $VM resume
+		fi;;
+		
+
+
+	savestate)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status running
+echo -e "$red----------------------------------------------------------------------------------"
+		echo -e "$blue¿A que maquina deseas grabarle el estado?"
+		echo -e $normal
+		read VM
+                if [ "$VM" != "" ]
+                then
+			VBoxManage controlvm $VM savestate
+		fi
+		;;
+
+
+
+	resumestate)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status saved
+echo -e "$red----------------------------------------------------------------------------------"
+		echo -e "$blue¿Que maquina deseas sacar de pausa?"
+		echo -e $normal
+		read VM
+                if [ "$VM" != "" ]
+                then
+			VBoxHeadless --startvm $VM &
+		fi
+		;;
+
+
+
+	stopacpi)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status running
+echo -e "$red----------------------------------------------------------------------------------"
+		echo -e "$blue¿Que maquina virtual deseas apagar?"
+		echo -e $normal
+		read VM
+                if [ "$VM" != "" ]
+                then
+			VBoxManage controlvm $VM acpipowerbutton
+		fi
+		;;
+
+
+        reset)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status running
+echo -e "$red----------------------------------------------------------------------------------"
+		echo -e "$blue¿Que maquina virtual deseas reiniciar?"
+		echo -e $normal
+		read VM
+                if [ "$VM" != "" ] 
+                then
+                	VBoxManage controlvm $VM reset
+		fi
+		;;
+
+
+	info)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+vboxmanage list vms
+echo -e "$red----------------------------------------------------------------------------------"                
+                echo -e "$blue¿De que maquina virtual deseas obtener informacion?"
+                echo -e $normal
+                read VM
+                if [ "$VM" != "" ]
+                then
+                VBoxManage showvminfo $VM
+		fi;;
+
+
+	memory)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status powered off
+echo -e "$red----------------------------------------------------------------------------------"                
+                echo -e "$blue¿A que maquina virtual deseas Agregar o quitar Memoria?"
+                echo -e $normal
+                read VM
+                if [ "$VM" != "" ]
+                then
+                	echo -e "$blue Indica la cantidad de momoria que tendra la VM (MB)"
+	                echo -e $normal
+			read MEM
+			if [ "$MEM" != "" ]
+                     		then
+				VBoxManage modifyvm $VM --memory $MEM
+		     	fi	
+	        fi;;
+
+	unregister)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status powered off
+echo -e "$red----------------------------------------------------------------------------------" 
+                echo -e "$blue¿A que maquina virtual deseas Desregistrar?"
+                echo -e $normal
+                read VM
+                if [ "$VM" != "" ]
+                then
+			echo -e "$red Deseas borrar TODOS los archivos de la VM (yes -- no) ?"
+                        echo -e $normal
+                        read DEL
+                        if [ "$DEL" = "yes" ]
+                                then
+                                VBoxManage unregistervm $VM --delete
+				else
+				VBoxManage unregistervm $VM
+                        fi
+                fi;;
+
+        vrde)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+$0 status powered off
+echo -e "$red----------------------------------------------------------------------------------" 
+                echo -e "$blue¿A que maquina virtual deseas Cambiar o activar el VRDE?"
+                echo -e $normal
+                read VM
+		vrde=$(vmPort $VM)
+		if [ "$vrde" == "" ]
+                then
+                        echo -e "$blue La Vm tiene el VRDE deshabilitado, deseas habilitarlo? ( on - off )"
+                        echo -e $normal
+                        read on
+                        if [ "$on" = "on" ]
+                                then
+				echo -e "$blue Que puerto desea ponerle (1 - 65535)"
+				echo -e $normal
+				read pn
+				VBoxManage modifyvm $VM --vrde $on --vrdeport $pn
+                                else
+                        	echo -e $normal
+			fi
+		else
+			echo -e "$blue Que puerto desea ponerle (1 - 65535)"
+                                echo -e $normal
+                                read pn
+                                VBoxManage modifyvm $VM --vrdeport $pn
+                fi;;
+
+
+        network)
+echo ""
+echo -e "$red------------------------------------VM'S------------------------------------------"
+echo -e $green;
+vboxmanage list vms
+echo -e "$red----------------------------------------------------------------------------------" 
+                echo -e "$blue¿A que maquina virtual deseas cambiar el tipo de configuracion de red?"
+                echo -e $normal
+                read VM
+		
+
+	;;
+
+	version)
+		echo -e "$yellow-----------------------"	
+		echo "Pichin come lulu V 2.1"
+		echo "-----------------------"
+		echo -e $normal;;
+		
+
+	status)   
+		echo -e $green;
+		aVmList=$(vboxmanage list vms |awk '{print$1 "+" $2}')
+		for a in $aVmList
+		do
+		# thing to do goes here
+		  name=$(echo $a|awk -F+ '{print$1}')
+		  serial=$(echo $a|awk -F+ '{print$2}')
+  	          ename=$(echo $name |sed 's/"//g') #nombre sin comillas
+		  
+		  if [ "$2" != "" ]
+		  then
+	
+			if [ "$ename" == "<inaccessible>" ]
+			then 
+				echo -e $red "Maquina Virtual Inaccesible $green ID VM $serial"
+			else	
+				state=$(vboxmanage showvminfo $ename  |grep State |grep $2 |awk -F' ' '{print$2}')
+				if [ "$state" != "" ] 
+        	                then   
+					port=$(vmPort $ename) 
+                	        	#echo -e $green $name $red $state $normal $port $blue $drbd on $mount ;
+					echo -e $green $name $normal $port
+                        	fi
+			fi
+		  else
+			
+			if [ "$ename" == "<inaccessible>" ]
+                                then
+                                        echo -e $red "Maquina Virtual Inaccesible $green ID VM $serial"
+                                else
+                		        mount=$(vmMount $ename)
+					state=$(vmState $ename)
+					drbd=$(drbdResource $ename)
+        		                port=$(vmPort $ename)
+		                  if [ "$state" != "" ]
+                		  then
+                        		echo -e $green $name $red $state $normal $port $blue $drbd on $mount ;
+                      		  fi	
+
+
+			fi
+		  fi
+		
+ 
+		done
+		echo -e $normal
+		;;
+
+
+	*)	
+		echo -e $green	
+		echo "controlvm Version 1.1 "
+	 	echo -e $normal	
+		echo "Usage: controlvm +(Parametro)"
+		echo ""
+		echo "parametros:"
+		echo ""
+		echo "start 		| Inicia la vm como demonio)"
+		echo "stop		| Apaga la maquina 'a lo bruto'"
+		echo "pause 		| Pone la maquina en stand by, maquina sigue corriendo"
+		echo "resume 		| Saca de stand by la maquina, resumen del estado anterior"
+		echo "savestate 	| Graba el estado, es el pause de vmware"
+		echo "resumestate 	| Resume el estado de pausa anterior"
+		echo "stopacpi	| Soft shutdown (como apretar el boton de power)"
+		echo "reset		| Reset de la maquina"
+               	echo "status		| Muestra el estado de las maquinas"
+		echo "memory		| Permite cambiar la memoria RAM de las VMs"
+		echo "unregister	| Permite desregistrar una vm"
+		echo "info		| Obtiene informacion de la VM selecionada"
+		echo "vrde              | Permite cambiar o activar el vrde en una vm"
+		echo "version		| Version"
+		echo -e $normal;;
+
+esac
