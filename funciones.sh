@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Retorna 0 si el nombre de la maquina virtual se encuentra registrado
+# o 	  1 en caso contrario
 
 function vmExists () {
 	local vmName='"'$1'"'
@@ -22,7 +24,11 @@ function vmExists () {
 	
 }
 
+
 #------------------------------------------------#
+# Retorna el estado de la maquina virtual si se encuentra registrada
+# Codigo 1 en caso contrario indicando error
+
 function vmState() {
         local vmName=$1
 	local state
@@ -36,6 +42,8 @@ function vmState() {
 }
 
 #--------------------------------
+# Retorna el punto de montaje de la maquina virtual si se encuentra registrada
+# Codigo 1 en caso contrario indicando error
 
 function vmMount () {
 	local vmName=$1
@@ -50,6 +58,8 @@ function vmMount () {
 	echo $output
 }
 #------------------------------------------------#
+# Retorna el Puerto de la maquina virtual si se encuentra registrada
+# Codigo 1 en caso contrario indicando error
 
 function vmPort () {
         local vmName=$1
@@ -62,6 +72,9 @@ function vmPort () {
 	echo $output
 }
 #-----------------------------------------------------#
+# Retorna las interfaces de red la maquina virtual si se encuentra registrada
+# Codigo 1 en caso contrario indicando error
+
 function vmNetwork () {
         local vmName=$1
         local output
