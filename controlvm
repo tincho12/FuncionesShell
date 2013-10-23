@@ -229,19 +229,6 @@ echo -e "$red-------------------------------------------------------------------
                 fi;;
 
 
-        network)
-echo ""
-echo -e "$red------------------------------------VM'S------------------------------------------"
-echo -e $green;
-vboxmanage list vms
-echo -e "$red----------------------------------------------------------------------------------" 
-                echo -e "$blue¿A que maquina virtual deseas cambiar el tipo de configuracion de red?"
-                echo -e $normal
-                read VM
-		
-
-	;;
-
 	version)
 		echo -e "$yellow-----------------------"	
 		echo "Pichin come lulu V 2.1"
