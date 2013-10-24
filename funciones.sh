@@ -1,79 +1,66 @@
 #!/bin/bash
 
+
 # -----------------------------------------------------
-# Retorna una lista con las vms registradas accessibles
+# Retorna una lista con los nombres de vms registradas accessibles
 # -----------------------------------------------------
 function vmListName () {
-	echo $(vboxmanage list vms |awk '{print$1}' |grep -v "<inaccessible>")
+	echo $(vboxmanage list vms  |grep -v "<inaccessible>" |awk '{print$1}')
+}
+
+# -----------------------------------------------------
+# Retorna una lista con los identificadores de vms registradas accessibles
+# -----------------------------------------------------
+function vmListId () {
+        echo $(vboxmanage list vms |grep -v "<inaccessible>" |awk -F'" ' '{print$2}')
 }
 
 # -------------------------------------------------------------------------
-# Retorna 0 si el nombre de la maquina virtual se encuentra registrado
-# o       1 en caso contrario. "0 Es True en Shell Script"
+# Retorna 0 si el nombre de la maquina virtual se encuentra registrada y Accesible
+#         1 en caso contrario. "0 Es True en Shell Script"
 # ------------------------------------------------------------------------
 function vmExists () {
-	local vmName='"'$1'"'
-	local itemVmName
-	local output
+	local vmId=$1
 
-	aVmList=$(vmListName)
-
-	for itemVmName in $aVmList; do
-		
-			if [ "$vmName" == "$itemVmName" ]; then
-				return 0 #True
-				exit
-			 fi
+	for itemVmId in $(vmListId); do
+		if [ $vmId == $itemVmId ]; then
+			return 0 #True
+			exit
+		 fi
 	done
 	
 	return 1 #False
-	
 }
 
 #------------------------------------------------#
-# Retorna el estado de la maquina virtual si se encuentra registrada
+# Retorna el estado de la maquina virtual si se encuentra registrada y Accesible
 # Codigo 1 en caso contrario indicando error
-
+#------------------------------------------------#
 function vmState() {
-        local vmName=$1
+        local vmId=$1
 	local state
 
-	if ! vmExists $vmName; then return 1; fi
+	if ! vmExists $vmId; then return 1; fi
 
-        state=$(vboxmanage showvminfo $vmName |grep State |awk '{ print $1" "$2" "$3}')
+        state=$(vboxmanage showvminfo $vmId |grep State |awk '{ print $1" "$2" "$3}')
         state=$(echo $state|cut -d'(' -f1 |awk -F':' '{print$2}')
 
         echo $state
-}
-
-#------------------------------------------------#
-# Retorna el estado de la maquina virtual si se encuentra registrada
-# Codigo 1 en caso contrario indicando error
-function vmId() {
-        local vmName=$1
-        local id
-
-        if ! vmExists $vmName; then return 1; fi
-
-        id=$(vboxmanage showvminfo $vmName |grep UUID |awk '{ print $1" "$2" "$3}')
-        id=$(echo $state|cut -d'(' -f1 |awk -F' ' '{print$2}')
-
-        echo $id
 }
 
 
 #--------------------------------
 # Retorna el punto de montaje de la maquina virtual si se encuentra registrada
 # Codigo 1 en caso contrario indicando error
-
+#----------------------------------
 function vmMount () {
-	local vmName=$1
+	local vmId=$1
 	local output
 	
-	if ! vmExists $vmName; then return 1; fi
+	if ! vmExists $vmId; then return 1; fi
 
 
-	output=$(vboxmanage showvminfo $vmName |grep "Config " |awk -F':' '{print$2}')
+	output=$(vboxmanage showvminfo $vmId |grep "Config " |awk -F':' '{print$2}')
 	output=${output%/*vbox}
 
 	echo $output
@@ -83,71 +70,24 @@ function vmMount () {
 # Codigo 1 en caso contrario indicando error
 
 function vmPort () {
-        local vmName=$1
+        local vmId=$1
         local output
 
-        if ! vmExists $vmName; then return 1; fi
+        if ! vmExists $vmId; then return 1; fi
 	
-	output=$(VBoxManage showvminfo $vmName |grep 'Ports ' |awk '{print $6}' |cut -d',' -f1)
+	output=$(VBoxManage showvminfo $vmId |grep 'Ports ' |awk '{print $6}' |cut -d',' -f1)
 	
 	echo $output
 }
-#-----------------------------------------------------#
-# Retorna las interfaces de red la maquina virtual si se encuentra registrada
-# Codigo 1 en caso contrario indicando error
-
-function vmNetwork () {
-        local vmName=$1
-        local output
-
-        if ! vmExists $vmName; then return 1; fi
-
-	output=$(VBoxManage showvminfo $vmName |grep NIC |awk -F':' '{print$1 $4 $5}' |grep Cable |awk -F',' '{print$1 $2}')
-	
-	echo -e $output
-}
-
-#-----------------------------------------------------#
-# Retorna la cantidad de interfaces de red de la maquina virtual 
-# Codigo 1 en caso contrario indicando error
-
-function vmNetCount () {
-        local vmName=$1
-        local output
-
-        if ! vmExists $vmName; then return 1; fi
-	
-
-        output=$(VBoxManage showvminfo $vmName |grep NIC |awk -F':' '{print$1 $4 $5}' |grep Cable |awk -F',' '{print$1 $2}'  |grep -c "NIC")
-
-        echo -e $output
-}
-#----------------------------------------------------
-# Retorna la cantidad de interfaces de red de la maquina virtual 
-# Codigo 1 en caso contrario indicando error
-
-function vmNetState () {
-        local vmName=$1
-	local nicNumber=$2
-        local output
-
-        if ! vmExists $vmName; then return 1; fi
-
-
-        output=$(VBoxManage showvminfo Debian8 |grep NIC |awk -F':' '{print$1 $4 $5}' |grep Cable |awk -F',' '{print$1 $2}' |grep "NIC $nicNumber" |awk -F' ' '{print$3}')
-
-        echo -e $output
-}
-
 
 #---------------------------------------------------------------
 function drbdResource () {
-	local vmName=$1
+	local vmId=$1
 	local output
 	
-	if ! vmExists $vmName; then return 1; fi	
+	if ! vmExists $vmId; then return 1; fi	
 
-	output=$(vboxmanage showvminfo $vmName |grep "Config " |awk -F':' '{print$2}'|awk -F '/' '{print$3}')
+	output=$(vboxmanage showvminfo $vmId |grep "Config " |awk -F':' '{print$2}'|awk -F '/' '{print$3}')
 	output=$(mount |grep "$output" |awk -F'on' '{print$1}' |grep /dev/)
 
 	echo $output
