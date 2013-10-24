@@ -1,29 +1,34 @@
 #!/bin/bash
 
-# Retorna 0 si el nombre de la maquina virtual se encuentra registrado
-# o 	  1 en caso contrario
+# -----------------------------------------------------
+# Retorna una lista con las vms registradas accessibles
+# -----------------------------------------------------
+function vmListName () {
+	echo $(vboxmanage list vms |awk '{print$1}' |grep -v "<inaccessible>")
+}
 
+# -------------------------------------------------------------------------
+# Retorna 0 si el nombre de la maquina virtual se encuentra registrado
+# o       1 en caso contrario. "0 Es True en Shell Script"
+# ------------------------------------------------------------------------
 function vmExists () {
 	local vmName='"'$1'"'
 	local itemVmName
 	local output
 
-	aVmList=$(vboxmanage list vms |awk '{print$1 "+" $2}' |grep -v "<inaccessible>")
+	aVmList=$(vmListName)
 
-	for item in $aVmList; do
-		itemVmName=$(echo $item|awk -F+ '{print$1}')
+	for itemVmName in $aVmList; do
 		
 			if [ "$vmName" == "$itemVmName" ]; then
-		        	#echo "0"
 				return 0 #True
 				exit
 			 fi
 	done
-	#echo "1"
+	
 	return 1 #False
 	
 }
-
 
 #------------------------------------------------#
 # Retorna el estado de la maquina virtual si se encuentra registrada
@@ -40,6 +45,22 @@ function vmState() {
 
         echo $state
 }
+
+#------------------------------------------------#
+# Retorna el estado de la maquina virtual si se encuentra registrada
+# Codigo 1 en caso contrario indicando error
+function vmId() {
+        local vmName=$1
+        local id
+
+        if ! vmExists $vmName; then return 1; fi
+
+        id=$(vboxmanage showvminfo $vmName |grep UUID |awk '{ print $1" "$2" "$3}')
+        id=$(echo $state|cut -d'(' -f1 |awk -F' ' '{print$2}')
+
+        echo $id
+}
+
 
 #--------------------------------
 # Retorna el punto de montaje de la maquina virtual si se encuentra registrada
