@@ -238,48 +238,28 @@ echo -e "$red-------------------------------------------------------------------
 
 	status)   
 		echo -e $green;
-		aVmList=$(vboxmanage list vms |awk '{print$1 "+" $2}')
-		for a in $aVmList
+		aVmList=$(vmListId)
+		for id in $aVmList
 		do
 		# thing to do goes here
-		  name=$(echo $a|awk -F+ '{print$1}')
-		  serial=$(echo $a|awk -F+ '{print$2}')
-  	          ename=$(echo $name |sed 's/"//g') #nombre sin comillas
 		  
 		  if [ "$2" != "" ]
 		  then
-	
-			if [ "$ename" == "<inaccessible>" ]
-			then 
-				echo -e $red "Maquina Virtual Inaccesible $green ID VM $serial"
-			else	
-				state=$(vboxmanage showvminfo $ename  |grep State |grep $2 |awk -F' ' '{print$2}')
-				if [ "$state" != "" ] 
-        	                then   
-					port=$(vmPort $ename) 
-                	        	#echo -e $green $name $red $state $normal $port $blue $drbd on $mount ;
-					echo -e $green $name $normal $port
-                        	fi
-			fi
+				state=$(vmState $id) #falta que solo se muetren las vm segund la condicion que este
+				name=$(vmName $id)
+				port=$(vmPort $id)
 		  else
-			
-			if [ "$ename" == "<inaccessible>" ]
-                                then
-                                        echo -e $red "Maquina Virtual Inaccesible $green ID VM $serial"
-                                else
-                		        mount=$(vmMount $ename)
-					state=$(vmState $ename)
-					drbd=$(drbdResource $ename)
-        		                port=$(vmPort $ename)
-		                  if [ "$state" != "" ]
-                		  then
-                        		echo -e $green $name $red $state $normal $port $blue $drbd on $mount ;
-                      		  fi	
-
-
-			fi
-		  fi
-		
+				name=$(vmName $id)	
+                	        mount=$(vmMount $id)
+				state=$(vmState $id)
+				drbd=$(drbdResource $id) on
+        		        port=$(vmPort $id)
+		               
+		fi
+				 if [ "$state" != "" ]
+                		 then
+                        		echo -e $green $name $red $state $normal $port $blue $drbd $mount ;
+                       	         fi	
  
 		done
 		echo -e $normal
@@ -306,7 +286,7 @@ echo -e "$red-------------------------------------------------------------------
 		echo "memory		| Permite cambiar la memoria RAM de las VMs"
 		echo "unregister	| Permite desregistrar una vm"
 		echo "info		| Obtiene informacion de la VM selecionada"
-		echo "vrde              | Permite cambiar o activar el vrde en una vm"
+		echo "vrde            | Permite cambiar o activar el vrde en una vm"
 		echo "version		| Version"
 		echo -e $normal;;
 
