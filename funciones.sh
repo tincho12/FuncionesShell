@@ -80,6 +80,24 @@ function vmPort () {
 	echo $output
 }
 
+#--------------------------------------------------------------------
+# Retorna el nombre de la maquina virtual si se encuentra registrada
+# Codigo 1 en caso contrario indicando error
+#-------------------------------------------------------------------
+
+function vmName() {
+        local vmId=$1
+        local name
+
+        if ! vmExists $vmId; then return 1; fi
+
+        name=$(vboxmanage showvminfo {a06bcd8a-da40-4fa7-87c7-0bcfd7fc0613} |grep Name: |awk '{ print $2}')
+
+       echo $name
+}
+
+
+
 #---------------------------------------------------------------
 function drbdResource () {
 	local vmId=$1
