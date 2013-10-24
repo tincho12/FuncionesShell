@@ -1,5 +1,21 @@
 #!/bin/bash
 
+#-----------------------
+#Declaracion de Constantes
+blue="\E[34m\E[1m";
+red="\E[31m\E[1m";
+yellow="\E[33m\E[1m";
+green="\E[37m\E[32m\E[1m";
+normal="\E[m";
+#-------------------------
+
+
+# -----------------------------------------------------
+# Retorna una lista con los identificadores de vms registradas accessibles
+# -----------------------------------------------------
+function vmRegisteredList () {
+        echo $(vboxmanage list vms |awk -F'" ' '{print$2}')
+}
 
 # -----------------------------------------------------
 # Retorna una lista con los nombres de vms registradas accessibles
@@ -89,13 +105,41 @@ function vmName() {
         local vmId=$1
         local name
 
-        if ! vmExists $vmId; then return 1; fi
+        if ! [[ "$(vmRegisteredList)" == *"$vmId"* ]] ; then return 1; fi
 
         name=$(vboxmanage list vms |grep $vmId |awk -F'{' '{ print $1}')
 
+	
        echo $name
 }
 
+#--------------------------------------------------------------------
+# Imprime estado de las vms
+#-------------------------------------------------------------------
+
+function vmStatus() {
+		aListStatus=$1		
+                aVmList=$(vmRegisteredList)
+                for vmId in $aVmList
+                do
+
+                	name=$(vmName $vmId)
+                        mount=$(vmMount $vmId)
+                        state=$(vmState $vmId)
+                        drbd=$(drbdResource $vmId)
+                        port=$(vmPort $vmId)
+			maybeVmId=""
+
+			if ! vmExists $vmId; then maybeVmId=$vmId; fi	
+
+			if [ "$aListStatus" != "" ]; then
+	                        echo -e $green $name $red $maybeVmId $normal $state $port $blue $drbd $mount | grep -e $(echo $aListStatus |sed 's/ / -e /g')
+			else
+				echo -e $green $name $red $maybeVmId $normal $state $port $blue $drbd $mount
+			fi
+
+                done
+}
 
 
 #---------------------------------------------------------------
