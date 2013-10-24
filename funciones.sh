@@ -8,7 +8,7 @@ function vmExists () {
 	local itemVmName
 	local output
 
-	aVmList=$(vboxmanage list vms |awk '{print$1 "+" $2}')
+	aVmList=$(vboxmanage list vms |awk '{print$1 "+" $2}' |grep -v "<inaccessible>")
 
 	for item in $aVmList; do
 		itemVmName=$(echo $item|awk -F+ '{print$1}')
@@ -85,6 +85,39 @@ function vmNetwork () {
 	
 	echo -e $output
 }
+
+#-----------------------------------------------------#
+# Retorna la cantidad de interfaces de red de la maquina virtual 
+# Codigo 1 en caso contrario indicando error
+
+function vmNetCount () {
+        local vmName=$1
+        local output
+
+        if ! vmExists $vmName; then return 1; fi
+	
+
+        output=$(VBoxManage showvminfo $vmName |grep NIC |awk -F':' '{print$1 $4 $5}' |grep Cable |awk -F',' '{print$1 $2}'  |grep -c "NIC")
+
+        echo -e $output
+}
+#----------------------------------------------------
+# Retorna la cantidad de interfaces de red de la maquina virtual 
+# Codigo 1 en caso contrario indicando error
+
+function vmNetState () {
+        local vmName=$1
+	local nicNumber=$2
+        local output
+
+        if ! vmExists $vmName; then return 1; fi
+
+
+        output=$(VBoxManage showvminfo Debian8 |grep NIC |awk -F':' '{print$1 $4 $5}' |grep Cable |awk -F',' '{print$1 $2}' |grep "NIC $nicNumber" |awk -F' ' '{print$3}')
+
+        echo -e $output
+}
+
 
 #---------------------------------------------------------------
 function drbdResource () {
