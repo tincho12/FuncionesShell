@@ -91,7 +91,7 @@ function vmName() {
 
         if ! vmExists $vmId; then return 1; fi
 
-        name=$(vboxmanage showvminfo $vmId |grep Name: |awk '{ print $2}')
+        name=$(vboxmanage list vms |grep $vmId |awk -F'{' '{ print $1}')
 
        echo $name
 }
