@@ -7,6 +7,9 @@ red="\E[31m\E[1m";
 yellow="\E[33m\E[1m";
 green="\E[37m\E[32m\E[1m";
 normal="\E[m";
+purple="\E[35m";
+cyan="\E[1;36m\E[1m";
+gray="\E[1;30m";
 #-------------------------
 
 
@@ -132,10 +135,12 @@ function vmStatus() {
 
 			if ! vmExists $vmId; then maybeVmId=$vmId; fi	
 
+			tmp=$(echo -e $gray $name '|' $purple $state '|' $gray $port '|' $normal $drbd $mount '|' $red $maybeVmId)
+
 			if [ "$aListStatus" != "" ]; then
-	                        echo -e $green $name $red $maybeVmId $normal $state $port $blue $drbd $mount | grep -e $(echo $aListStatus |sed 's/ / -e /g')
+	                        echo $tmp | grep -e $(echo $aListStatus |sed 's/ / -e /g') | awk -F'|' '{ printf "%30s %20s %20s %10s %5s\n", $1, $2, $3, $4, $5}'
 			else
-				echo -e $green $name $red $maybeVmId $normal $state $port $blue $drbd $mount
+				echo $tmp | awk -F'|' '{ printf "%30s %20s %20s %10s %5s\n", $1, $2, $3, $4, $5}'
 			fi
 
                 done
