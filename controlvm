@@ -1,5 +1,5 @@
 #!/bin/bash
-source funciones1.sh
+source funciones.sh
 
 
 case $1 in
