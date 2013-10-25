@@ -7,11 +7,10 @@ red="\E[31m\E[1m";
 yellow="\E[33m\E[1m";
 green="\E[37m\E[32m\E[1m";
 normal="\E[m";
-purple="\E[35m";
+purple="\033[1;35m";
 cyan="\E[1;36m\E[1m";
-gray="\E[1;30m";
+gray="\033[1;30m";
 #-------------------------
-
 
 # -----------------------------------------------------
 # Retorna una lista con los identificadores de vms registradas accessibles
@@ -131,16 +130,16 @@ function vmStatus() {
                         state=$(vmState $vmId)
                         drbd=$(drbdResource $vmId)
                         port=$(vmPort $vmId)
+			port=$port
 			maybeVmId=""
 
 			if ! vmExists $vmId; then maybeVmId=$vmId; fi	
 
-			tmp=$(echo -e $gray $name '|' $purple $state '|' $gray $port '|' $normal $drbd $mount '|' $red $maybeVmId)
-
+			tmp=$(echo $name '|' $state '|' $port '|' $drbd $mount '|' $maybeVmId)
 			if [ "$aListStatus" != "" ]; then
-	                        echo $tmp | grep -e $(echo $aListStatus |sed 's/ / -e /g') | awk -F'|' '{ printf "%30s %20s %20s %10s %5s\n", $1, $2, $3, $4, $5}'
+	                        echo $tmp | grep -e $(echo $aListStatus |sed 's/ / -e /g') | awk -F'|' '{ printf "\033[1;30m%20s \033[1;35m%-17s \033[1;30m%5d\n", $1, $2, $3}'
 			else
-				echo $tmp | awk -F'|' '{ printf "%30s %20s %20s %10s %5s\n", $1, $2, $3, $4, $5}'
+				echo $tmp | awk -F'|' '{ printf "\033[1;30m%20s \033[1;35m%-17s \033[1;30m%5d \033[1;34m%10s \033[1;31m%5s\n", $1,$2, $3, $4, $5}'
 			fi
 
                 done
