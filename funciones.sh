@@ -135,11 +135,11 @@ function vmStatus() {
 
 			if ! vmExists $vmId; then maybeVmId=$vmId; fi	
 
-			tmp=$(echo $name '|' $state '|' $port '|' $drbd $mount '|' $maybeVmId)
+			tmp=$(echo $name '|' $state '|' $port '|' $drbd '|' $mount '|' $maybeVmId)
 			if [ "$aListStatus" != "" ]; then
 	                        echo $tmp | grep -e $(echo $aListStatus |sed 's/ / -e /g') | awk -F'|' '{ printf "\033[1;30m%20s \033[1;35m%-17s \033[1;30m%5d\n", $1, $2, $3}'
 			else
-				echo $tmp | awk -F'|' '{ printf "\033[1;30m%20s \033[1;35m%-17s \033[1;30m%5d \033[1;34m%10s \033[1;31m%5s\n", $1,$2, $3, $4, $5}'
+				echo $tmp | awk -F'|' '{ printf "\033[1;30m%-20s \033[1;35m%-17s \033[1;30m%5d \033[1;34m%-15s \033[1;33m%-s \033[1;31m%s \n", $1,$2, $3, $4, $5, $6}'
 			fi
 
                 done
